@@ -1,0 +1,8 @@
+# Ignore dataset and caches
+/data/
+*.Rproj.user/
+*.html
+*.pdf
+*.docx
+*.log
+cache/
