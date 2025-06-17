@@ -1,0 +1,96 @@
+---
+title: "Learning Methods Analysis"
+format: revealjs
+---
+
+# Title
+
+## Which study method works best?
+
+---
+
+# Agenda
+
+1. Data load
+2. Cleaning
+3. LSA
+4. LDA
+5. Sentiment
+6. Conclusions
+
+---
+
+```{r setup}
+library(tidyverse)
+library(tidytext)
+library(lsa)
+library(topicmodels)
+library(umap)
+library(ggwordcloud)
+library(textmineR)
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+---
+
+```{r data-load}
+learn_data <- read_csv("../data/student-math-learning.csv")
+```
+
+---
+
+```{r clean}
+text_df <- learn_data %>%
+  select(text_column = 1) %>%
+  unnest_tokens(word, text_column) %>%
+  anti_join(stop_words, by = "word")
+```
+
+---
+
+```{r lsa}
+term_mat <- text_df %>%
+  count(document = row_number(), word) %>%
+  cast_dtm(document, word, n)
+
+term_tfidf <- weightTfIdf(term_mat)
+lsa_res <- lsa(term_tfidf, dims = 20)
+
+coords <- as.data.frame(lsa_res$dk)
+coords$doc <- rownames(coords)
+
+coords %>%
+  ggplot(aes(Dim1, Dim2)) +
+  geom_point() +
+  theme_minimal()
+```
+
+---
+
+```{r lda}
+lda_model <- LDA(term_mat, k = 8, control = list(seed = 123))
+terms(lda_model, 10) %>%
+  knitr::kable()
+```
+
+---
+
+```{r sentiment}
+text_df %>%
+  inner_join(get_sentiments("nrc"), by = "word") %>%
+  count(sentiment) %>%
+  ggplot(aes(sentiment, n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  theme_minimal()
+```
+
+---
+
+# Conclusions
+
+- LSA and LDA highlight topic structure
+- Sentiment shows overall tone
+- Further tuning and validation required
+- **TODO**: integrate additional metadata
