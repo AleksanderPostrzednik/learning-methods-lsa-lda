@@ -28,6 +28,7 @@ library(topicmodels)
 library(umap)
 library(ggwordcloud)
 library(textmineR)
+library(plotly)
 
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
@@ -42,7 +43,8 @@ learn_data <- read_csv("../data/student-math-learning.csv")
 
 ```{r clean}
 text_df <- learn_data %>%
-  select(text_column = 1) %>%
+  mutate(document = row_number()) %>%
+  select(document, text_column = 1, learning_style, performance) %>%
   unnest_tokens(word, text_column) %>%
   anti_join(stop_words, by = "word")
 ```
@@ -51,7 +53,7 @@ text_df <- learn_data %>%
 
 ```{r lsa}
 term_mat <- text_df %>%
-  count(document = row_number(), word) %>%
+  count(document, word) %>%
   cast_dtm(document, word, n)
 
 term_tfidf <- weightTfIdf(term_mat)
@@ -74,6 +76,26 @@ terms(lda_model, 10) %>%
   knitr::kable()
 ```
 
+```{r lda-prepare}
+doc_topics <- posterior(lda_model)$topics
+topic_df <- as.data.frame(doc_topics)
+topic_df$document <- as.integer(rownames(topic_df))
+topic_df$dominant_topic <- apply(doc_topics, 1, which.max)
+
+sentiment_doc <- text_df %>%
+  inner_join(get_sentiments("afinn"), by = "word") %>%
+  group_by(document) %>%
+  summarise(sentiment = sum(value, na.rm = TRUE), .groups = "drop")
+
+meta_df <- learn_data %>%
+  mutate(document = row_number()) %>%
+  select(document, learning_style, performance)
+
+topic_meta <- topic_df %>%
+  left_join(meta_df, by = "document") %>%
+  left_join(sentiment_doc, by = "document")
+```
+
 ---
 
 ```{r sentiment}
@@ -84,6 +106,60 @@ text_df %>%
   geom_col(show.legend = FALSE) +
   coord_flip() +
   theme_minimal()
+```
+
+---
+
+## Learning Style Comparison
+
+```{r style-comparison}
+style_summary <- topic_meta %>%
+  group_by(learning_style) %>%
+  summarise(avg_sentiment = mean(sentiment, na.rm = TRUE))
+
+p_style <- ggplot(style_summary,
+                  aes(learning_style, avg_sentiment, fill = learning_style)) +
+  geom_col(show.legend = FALSE) +
+  theme_minimal()
+
+ggplotly(p_style)
+```
+
+---
+
+## Topic Clusters (UMAP)
+
+```{r umap}
+umap_res <- umap(coords[,1:20])
+umap_df <- as.data.frame(umap_res$layout)
+colnames(umap_df) <- c("Dim1", "Dim2")
+umap_df$document <- as.integer(coords$doc)
+umap_df <- left_join(umap_df, topic_meta, by = "document")
+
+p_umap <- ggplot(umap_df,
+                 aes(Dim1, Dim2, color = learning_style,
+                     text = paste0("Doc ", document,
+                                    "<br>Topic ", dominant_topic))) +
+  geom_point() +
+  theme_minimal()
+
+ggplotly(p_umap)
+```
+
+---
+
+## Topic-wise Insights
+
+```{r topic-insights}
+topic_stats <- topic_meta %>%
+  group_by(dominant_topic) %>%
+  summarise(
+    responses = n(),
+    avg_sentiment = mean(sentiment, na.rm = TRUE),
+    avg_perf = mean(performance, na.rm = TRUE)
+  )
+
+knitr::kable(topic_stats)
 ```
 
 ---

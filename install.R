@@ -5,7 +5,8 @@ packages <- c(
   "topicmodels",
   "umap",
   "ggwordcloud",
-  "textmineR"
+  "textmineR",
+  "plotly"
 )
 
 install_if_missing <- function(pkg) {
