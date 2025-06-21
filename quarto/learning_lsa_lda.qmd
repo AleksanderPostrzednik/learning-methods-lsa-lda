@@ -36,7 +36,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ---
 
 ```{r data-load}
-learn_data <- read_csv("../data/student-math-learning.csv")
+learn_data <- read_csv("../data/student_performance_large_dataset.csv")
 ```
 
 ---
