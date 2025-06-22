@@ -39,8 +39,8 @@ library(janitor)
 library(tm) # for weightTfIdf
 library(textdata)
 
-# Load helper functions
-source("R/utils.R")
+# Load helper functions - path relative to this file
+source("../R/utils.R")
 
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
