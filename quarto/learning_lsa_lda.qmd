@@ -29,6 +29,7 @@ library(umap)
 library(ggwordcloud)
 library(textmineR)
 library(plotly)
+library(janitor)
 
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
@@ -36,7 +37,14 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ---
 
 ```{r data-load}
-learn_data <- read_csv("../data/student_performance_large_dataset.csv")
+learn_data <- read_csv("../data/student_performance_large_dataset.csv") %>%
+  janitor::clean_names()
+
+required_cols <- c("learning_style", "performance")
+missing <- setdiff(required_cols, names(learn_data))
+if (length(missing) > 0) {
+  stop(paste("Missing columns:", paste(missing, collapse = ", ")))
+}
 ```
 
 ---

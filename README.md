@@ -141,7 +141,8 @@ pkgs <- c(
   "textmineR",   # Obliczanie koherencji i inne narzędzia
   "umap",        # Redukcja wymiarowości (2D)
   "ggwordcloud", # Chmury słów
-  "readr"        # Szybki import plików CSV
+  "readr",       # Szybki import plików CSV
+  "janitor"      # Czyszczenie nazw kolumn
 )
 
 # 4. Instalacja pakietów
