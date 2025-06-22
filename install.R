@@ -50,8 +50,27 @@ lex_ok <- function(name) {
       "Run `tidytext::get_sentiments('%s')` once in an interactive R session to cache the file.",
       name
     )
-    if (!interactive()) message("[WARN] ", e$message, "\n       ", msg)
-    else message("[WARN] ", e$message)
+    if (name == "nrc" && !interactive()) {
+      dir <- textdata::lexicon_nrc(return_path = TRUE)
+      zip <- file.path(dir, "nrc.zip")
+      url <- "https://saifmohammad.com/WebDocs/NRC-Emotion-Lexicon.zip"
+      dir.create(dir, showWarnings = FALSE, recursive = TRUE)
+      try(download.file(url, zip, quiet = TRUE), silent = TRUE)
+      try(unzip(zip, exdir = dir), silent = TRUE)
+      src <- file.path(dir, "NRC-Emotion-Lexicon", "NRC-Emotion-Lexicon-v0.92",
+                       "NRC-Emotion-Lexicon-Wordlevel-v0.92.txt")
+      dst <- file.path(dir, "NRC-Emotion-Lexicon",
+                       "NRC-Emotion-Lexicon-Wordlevel-v0.92.txt")
+      if (file.exists(src)) file.copy(src, dst, overwrite = TRUE)
+      try({
+        lex <- tidytext::get_sentiments(name)
+        out <<- NROW(lex) > 0
+      }, silent = TRUE)
+    }
+    if (!out) {
+      if (!interactive()) message("[WARN] ", e$message, "\n       ", msg)
+      else message("[WARN] ", e$message)
+    }
   })
   out
 }
