@@ -8,3 +8,4 @@
 *.docx
 *.log
 cache/
+quarto/learning_lsa_lda_files/
