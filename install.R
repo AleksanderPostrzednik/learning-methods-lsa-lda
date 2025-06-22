@@ -1,64 +1,80 @@
 # install.R
-# ----------
-# Instalacja i wstępna konfiguracja pakietów potrzebnych do projektu
-# (lokalne, offline; bez interaktywnego pobierania podczas renderu Quarto)
+# Robust non-interactive installer for project dependencies
 
-# 1. Stałe ustawienia --------------------------------------------------------
-options(repos = c(CRAN = "https://cloud.r-project.org"))      # domyślne mirror CRAN
-options(textdata.download = TRUE)                             # zezwól textdata na pobieranie
+# 1. Default CRAN mirror and textdata option
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+options(textdata.download = TRUE)
 
-# 2. Lista wymaganych pakietów ----------------------------------------------
+# 2. Required packages
 pkgs <- c(
   "tidyverse", "janitor", "tidytext", "textdata",
   "topicmodels", "textmineR", "tm", "SnowballC",
   "wordcloud", "knitr", "quarto"
 )
 
-# 3. Funkcja pomocnicza – instaluj, jeśli brakuje ----------------------------
-install_if_missing <- function(p) {
-  if (!requireNamespace(p, quietly = TRUE)) {
-    message(sprintf("[INFO] Installing package '%s' ...", p))
-    install.packages(p)
+# 3. Helper to install packages with retries
+ensure_pkg <- function(pkg, max_attempts = 3) {
+  for (i in seq_len(max_attempts)) {
+    if (requireNamespace(pkg, quietly = TRUE)) return(TRUE)
+    message(sprintf("[INFO] Installing '%s' (attempt %d/%d)...", pkg, i, max_attempts))
+    tryCatch({
+      if (.Platform$OS.type == "windows" && pkg %in% loadedNamespaces()) {
+        try(unloadNamespace(pkg), silent = TRUE)
+      }
+      install.packages(pkg, dependencies = TRUE)
+    }, error = function(e) {
+      message("[WARN] ", e$message)
+      lock <- file.path(.libPaths()[1], paste0("00LOCK-", pkg))
+      if (dir.exists(lock)) unlink(lock, recursive = TRUE, force = TRUE)
+      tryCatch(install.packages(pkg, type = "binary", dependencies = TRUE),
+               error = function(e2) message("[WARN] binary install failed: ", e2$message))
+    })
+    if (requireNamespace(pkg, quietly = TRUE)) return(TRUE)
+    Sys.sleep(1)
   }
+  FALSE
 }
 
-# 4. Instalacja wymaganych pakietów ------------------------------------------
-invisible(lapply(pkgs, install_if_missing))
-message("[INFO] Wszystkie pakiety bazowe są zainstalowane lub już były obecne.")
+# 4. Install required packages
+ok_pkgs <- vapply(pkgs, ensure_pkg, logical(1))
 
-# --------------------------------------------------
-# 5. Pobranie i cache słowników sentimentu ---------
-# --------------------------------------------------
+# 5. Load textdata and download lexicons
+lex_ok <- function(name) {
+  out <- FALSE
+  tryCatch({
+    if (!requireNamespace("textdata", quietly = TRUE)) stop("textdata missing")
+    if (exists("download_lexicon", where = asNamespace("textdata"))) {
+      textdata::download_lexicon(name)
+    } else {
+      get(paste0("lexicon_", name), envir = asNamespace("textdata"))(ask = FALSE)
+    }
+    file <- file.path(textdata::lexicon_cache_dir(), paste0(name, ".rds"))
+    out <- file.exists(file)
+  }, error = function(e) {
+    msg <- sprintf("Run `tidytext::get_sentiments('%s')` once in an interactive R session to cache the file.", name)
+    if (!interactive()) message("[WARN] ", e$message, "\n       ", msg)
+    else message("[WARN] ", e$message)
+  })
+  out
+}
 
-library(textdata)   # jawne wczytanie, żeby było wiadomo skąd funkcje
+afinn_ok <- lex_ok("afinn")
+nrc_ok   <- lex_ok("nrc")
 
-message("[INFO] Pobieranie słownika AFINN...")
-tryCatch({
-  textdata::download_lexicon("afinn")          # ⇦ bez menu, bez argumentów
-  message("[INFO] AFINN OK.")
-}, error = function(e) {
-  message("[WARN] AFINN: ", e$message)
-})
+# 6. Check all packages load
+load_ok <- vapply(pkgs, function(p) {
+  tryCatch({
+    library(p, character.only = TRUE)
+    TRUE
+  }, error = function(e) FALSE)
+}, logical(1))
 
-message("[INFO] Pobieranie słownika NRC...")
-tryCatch({
-  textdata::download_lexicon("nrc")            # ⇦ analogicznie dla NRC
-  message("[INFO] NRC OK.")
-}, error = function(e) {
-  message("[WARN] NRC: ", e$message,
-          "\n       Możesz pobrać ręcznie w sesji interaktywnej: ",
-          'tidytext::get_sentiments("nrc")')
-})
+success <- all(ok_pkgs) && all(load_ok) && afinn_ok && nrc_ok
 
-# 6. Pre-download dodatkowych leksykonów sentimentu --------------------------
-message("[INFO] Pobieranie pozostałych leksykonów sentymentu (tidytext)...")
-tryCatch({
-  tidytext::get_sentiments("afinn")
-  tidytext::get_sentiments("nrc")
-  message("[INFO] Lexikony AFINN i NRC pobrane pomyślnie.")
-}, error = function(e) {
-  message("[WARN] Nie udało się pobrać lexikonów automatycznie: ", e$message,
-          "\n       Zostaną pobrane przy pierwszym użyciu w dokumencie.")
-})
+if (success) {
+  cat("\033[32m[SUCCESS]\033[39m Packages and lexicons ready.\n")
+} else {
+  cat("\033[31m[FAIL]\033[39m Some components failed to install or load.\n")
+}
 
-message("[INFO] install.R zakończony sukcesem.")
+invisible(success)
