@@ -38,6 +38,9 @@ library(janitor)
 library(tm) # for weightTfIdf
 library(textdata)
 
+# Load helper functions
+source("R/utils.R")
+
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
@@ -110,9 +113,10 @@ topic_df <- as.data.frame(doc_topics)
 topic_df$document <- as.integer(rownames(topic_df))
 topic_df$dominant_topic <- apply(doc_topics, 1, which.max)
 
-sentiment_doc <- text_df |>
-  inner_join(get_sentiments("afinn"), by = "word") |>
-  summarise(sentiment = sum(value, na.rm = TRUE), .by = document)
+sentiment_doc <- calc_sentiment(
+  df_raw %>% transmute(id = row_number(), text = text_for_analysis)
+) %>%
+  rename(document = id)
 
 meta_df <- df_raw %>%
   mutate(document = row_number()) %>%
