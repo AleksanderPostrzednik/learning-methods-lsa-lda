@@ -49,7 +49,7 @@ Aby uruchomić projekt, wykonaj poniższe kroki w terminalu, będąc w głównym
     ```
 
 2.  **Zainstaluj pakiety R:**
-    *   Ten skrypt użyje `renv` do zainstalowania wszystkich wymaganych pakietów R.
+    *   Skrypt zainstaluje brakujące pakiety R i pobierze słowniki sentymentu.
     ```bash
     Rscript install.R
     ```
@@ -86,13 +86,11 @@ learning-methods-lsa-lda/
 │   └── student_performance_large_dataset.csv
 ├── quarto/
 │   └── learning_lsa_lda.qmd       # ⇦ Główny plik ze slajdami (reveal.js)
-├── renv/                          # ⇦ Biblioteki R (ignorowane przez .gitignore)
 ├── scripts/
 │   ├── setup_kaggle.sh            # ⇦ Pobiera dane i konfiguruje API token
 │   └── bake_wordclouds.R          # ⇦ (Opcjonalnie) Generuje chmury słów jako PNG
 ├── .gitignore
-├── install.R                      # ⇦ Instaluje pakiety R i inicjuje renv
-├── renv.lock                      # ⇦ Plik blokady wersji pakietów R
+├── install.R                      # ⇦ Skrypt do instalacji pakietów R
 └── README.md                      # ⇦ Ten plik
 ```
 
@@ -118,40 +116,33 @@ Aby pobrać dane, potrzebujesz konta na [Kaggle](https://kaggle.com).
 
 > **Alternatywa (ręczna):** Ustaw zmienne środowiskowe `KAGGLE_USERNAME` i `KAGGLE_KEY`, a następnie wykonaj komendy `kaggle datasets download ...` i `unzip ...` ręcznie.
 
-### 2. Instalacja pakietów R (renv)
+### 2. Instalacja pakietów R
 
-Projekt używa `renv` do zarządzania zależnościami w R. Skrypt `install.R` automatyzuje cały proces.
+Skrypt `install.R` instaluje potrzebne pakiety z CRAN i wstępnie pobiera słowniki sentymentu.
 
 ```R
 # install.R
-# 1. Instalacja renv, jeśli nie istnieje
-if (!require("renv")) {
-  install.packages("renv")
-}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+options(textdata.download = TRUE)
 
-# 2. Inicjalizacja środowiska renv
-renv::init(bare = TRUE)
-
-# 3. Lista wymaganych pakietów
 pkgs <- c(
-  "tidyverse",   # Przetwarzanie danych i ggplot2
-  "tidytext",    # Tokenizacja tekstu
-  "lsa",         # Latent Semantic Analysis
-  "topicmodels", # Modelowanie tematów (LDA)
-  "textmineR",   # Obliczanie koherencji i inne narzędzia
-  "umap",        # Redukcja wymiarowości (2D)
-  "ggwordcloud", # Chmury słów
-  "readr",       # Szybki import plików CSV
-  "janitor"      # Czyszczenie nazw kolumn
+  "tidyverse", "janitor", "tidytext", "textdata",
+  "topicmodels", "textmineR", "tm", "SnowballC",
+  "wordcloud", "knitr", "quarto"
 )
 
-# 4. Instalacja pakietów
-install.packages(pkgs)
+install_if_missing <- function(p) {
+  if (!requireNamespace(p, quietly = TRUE)) {
+    install.packages(p)
+  }
+}
 
-# 5. Zapisanie stanu biblioteki do renv.lock
-renv::snapshot()
+invisible(lapply(pkgs, install_if_missing))
+
+library(textdata)
+textdata::download_lexicon("afinn")
+textdata::download_lexicon("nrc")
 ```
-> **Ważne:** Plik `renv.lock` powinien być częścią repozytorium. Katalog `renv/library` jest ignorowany przez `.gitignore`.
 
 ---
 
