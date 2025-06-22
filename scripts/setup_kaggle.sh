@@ -1,36 +1,30 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
-# Directory for data files
-DATA_DIR="$(dirname "$0")/../data"
-mkdir -p "$DATA_DIR"
+# Download directory
+mkdir -p data
+FILE="data/student_performance.csv"
 
-# Configure Kaggle credentials if kaggle.json provided in repo root
-if [ ! -f ~/.kaggle/kaggle.json ]; then
-  if [ -f kaggle.json ]; then
-    mkdir -p ~/.kaggle
-    cp kaggle.json ~/.kaggle/
-    chmod 600 ~/.kaggle/kaggle.json
-  else
-    echo "Error: Kaggle API token not found. Place kaggle.json in repo root or ~/.kaggle/" >&2
+# Skip if file already present
+if [[ -f "$FILE" ]]; then
+    echo "[INFO] $FILE already exists – skip download."
+    exit 0
+fi
+
+# Verify Kaggle credentials
+if [[ ! -f ~/.kaggle/kaggle.json ]]; then
+    echo "[ERROR] ~/.kaggle/kaggle.json not found. Please configure Kaggle API token." >&2
     exit 1
-  fi
 fi
 
-# Download dataset
-kaggle datasets download -d adilshamim8/student-performance-and-learning-style -p "$DATA_DIR"
+echo "[INFO] Downloading dataset from Kaggle..."
+kaggle datasets download -d adilshamim8/student-performance-and-learning-style -f student_performance.csv -p data/
 
-# Unzip and clean up
-ZIP_FILE="$DATA_DIR/student-performance-and-learning-style.zip"
-if [ -f "$ZIP_FILE" ]; then
-  unzip -o "$ZIP_FILE" -d "$DATA_DIR"
-  rm "$ZIP_FILE"
+# Unzip if necessary
+if ls data/*.zip 1>/dev/null 2>&1; then
+    unzip -o data/*.zip -d data/
+    rm data/*.zip
 fi
 
-# Optionally rename main csv to expected name
-MAIN_CSV=$(ls "$DATA_DIR"/*.csv 2>/dev/null | head -n 1)
-if [ -n "$MAIN_CSV" ] && [ ! -f "$DATA_DIR/student_performance_large_dataset.csv" ]; then
-  mv "$MAIN_CSV" "$DATA_DIR/student_performance_large_dataset.csv"
-fi
-
-echo "Data downloaded to $DATA_DIR"
+mv -f data/*student*performance*.csv "$FILE"
+echo "[INFO] Saved to $FILE"

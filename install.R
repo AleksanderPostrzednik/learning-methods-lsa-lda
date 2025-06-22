@@ -1,19 +1,6 @@
-packages <- c(
-  "tidyverse",
-  "tidytext",
-  "lsa",
-  "topicmodels",
-  "umap",
-  "ggwordcloud",
-  "textmineR",
-  "plotly",
-  "janitor"
-)
+pkgs <- c("tidyverse","janitor","tidytext","topicmodels","textmineR",
+          "tm","SnowballC","wordcloud","knitr","quarto")
 
-install_if_missing <- function(pkg) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg, repos = "https://cloud.r-project.org")
-  }
-}
+install_if_missing <- function(p) if (!requireNamespace(p, quietly = TRUE)) install.packages(p)
 
-invisible(lapply(packages, install_if_missing))
+invisible(lapply(pkgs, install_if_missing))

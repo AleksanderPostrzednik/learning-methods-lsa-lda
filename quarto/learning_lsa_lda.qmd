@@ -37,11 +37,11 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ---
 
 ```{r data-load}
-learn_data <- read_csv("../data/student_performance_large_dataset.csv") %>%
+df_raw <- read_csv("data/student_performance.csv") %>%
   janitor::clean_names()
 
 required_cols <- c("learning_style", "performance")
-missing <- setdiff(required_cols, names(learn_data))
+missing <- setdiff(required_cols, names(df_raw))
 if (length(missing) > 0) {
   stop(paste("Missing columns:", paste(missing, collapse = ", ")))
 }
@@ -50,7 +50,7 @@ if (length(missing) > 0) {
 ---
 
 ```{r clean}
-text_df <- learn_data %>%
+text_df <- df_raw %>%
   mutate(document = row_number()) %>%
   select(document, text_column = 1, learning_style, performance) %>%
   unnest_tokens(word, text_column) %>%
@@ -95,7 +95,7 @@ sentiment_doc <- text_df %>%
   group_by(document) %>%
   summarise(sentiment = sum(value, na.rm = TRUE), .groups = "drop")
 
-meta_df <- learn_data %>%
+meta_df <- df_raw %>%
   mutate(document = row_number()) %>%
   select(document, learning_style, performance)
 
