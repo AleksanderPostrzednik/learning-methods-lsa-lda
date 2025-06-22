@@ -37,10 +37,10 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ---
 
 ```{r data-load}
-df_raw <- read_csv("data/student_performance.csv") %>%
+df_raw <- read_csv("data/student_performance_large_dataset.csv") %>%
   janitor::clean_names()
 
-required_cols <- c("learning_style", "performance")
+required_cols <- c("gender", "math_score")
 missing <- setdiff(required_cols, names(df_raw))
 if (length(missing) > 0) {
   stop(paste("Missing columns:", paste(missing, collapse = ", ")))
@@ -52,7 +52,7 @@ if (length(missing) > 0) {
 ```{r clean}
 text_df <- df_raw %>%
   mutate(document = row_number()) %>%
-  select(document, text_column = 1, learning_style, performance) %>%
+  select(document, text_column = study_notes, gender, math_score) %>%
   unnest_tokens(word, text_column) %>%
   anti_join(stop_words, by = "word")
 ```
@@ -97,7 +97,7 @@ sentiment_doc <- text_df %>%
 
 meta_df <- df_raw %>%
   mutate(document = row_number()) %>%
-  select(document, learning_style, performance)
+  select(document, gender, math_score)
 
 topic_meta <- topic_df %>%
   left_join(meta_df, by = "document") %>%
@@ -122,11 +122,11 @@ text_df %>%
 
 ```{r style-comparison}
 style_summary <- topic_meta %>%
-  group_by(learning_style) %>%
+  group_by(gender) %>%
   summarise(avg_sentiment = mean(sentiment, na.rm = TRUE))
 
 p_style <- ggplot(style_summary,
-                  aes(learning_style, avg_sentiment, fill = learning_style)) +
+                  aes(gender, avg_sentiment, fill = gender)) +
   geom_col(show.legend = FALSE) +
   theme_minimal()
 
@@ -145,7 +145,7 @@ umap_df$document <- as.integer(coords$doc)
 umap_df <- left_join(umap_df, topic_meta, by = "document")
 
 p_umap <- ggplot(umap_df,
-                 aes(Dim1, Dim2, color = learning_style,
+                 aes(Dim1, Dim2, color = gender,
                      text = paste0("Doc ", document,
                                     "<br>Topic ", dominant_topic))) +
   geom_point() +
@@ -164,7 +164,7 @@ topic_stats <- topic_meta %>%
   summarise(
     responses = n(),
     avg_sentiment = mean(sentiment, na.rm = TRUE),
-    avg_perf = mean(performance, na.rm = TRUE)
+    avg_perf = mean(math_score, na.rm = TRUE)
   )
 
 knitr::kable(topic_stats)
