@@ -11,7 +11,8 @@ options(textdata.download = TRUE)                             # zezwól textdata
 pkgs <- c(
   "tidyverse", "janitor", "tidytext", "textdata",
   "topicmodels", "textmineR", "tm", "SnowballC",
-  "wordcloud", "knitr", "quarto"
+  "wordcloud", "knitr", "quarto",
+  "lsa", "umap", "plotly", "ggwordcloud"
 )
 
 # 3. Funkcja pomocnicza – instaluj, jeśli brakuje ----------------------------
