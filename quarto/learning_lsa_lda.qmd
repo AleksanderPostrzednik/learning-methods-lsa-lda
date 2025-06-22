@@ -1,6 +1,11 @@
 ---
 title: "Learning Methods Analysis"
-format: revealjs
+format:
+  revealjs:
+    code-fold: true
+  html:
+    code-fold: true
+freeze: auto
 ---
 
 # Title
@@ -105,10 +110,9 @@ topic_df <- as.data.frame(doc_topics)
 topic_df$document <- as.integer(rownames(topic_df))
 topic_df$dominant_topic <- apply(doc_topics, 1, which.max)
 
-sentiment_doc <- text_df %>%
-  inner_join(get_sentiments("afinn"), by = "word") %>%
-  group_by(document) %>%
-  summarise(sentiment = sum(value, na.rm = TRUE), .groups = "drop")
+sentiment_doc <- text_df |>
+  inner_join(get_sentiments("afinn"), by = "word") |>
+  summarise(sentiment = sum(value, na.rm = TRUE), .by = document)
 
 meta_df <- df_raw %>%
   mutate(document = row_number()) %>%

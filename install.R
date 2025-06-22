@@ -8,6 +8,12 @@ install_if_missing <- function(p) if (!requireNamespace(p, quietly = TRUE)) inst
 
 invisible(lapply(pkgs, install_if_missing))
 
+# Ensure AFINN lexicon is available for offline use
+if (!textdata::lexicon_afinn_exists()) {
+  textdata::lexicon_afinn(download = "force")
+}
+options(textdata.download = TRUE)
+
 # Pre-download lexicons to avoid interactive prompts during rendering
 print("[INFO] Downloading sentiment lexicons...")
 tryCatch({
