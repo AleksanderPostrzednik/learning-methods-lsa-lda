@@ -31,7 +31,7 @@ Głównym celem jest zbadanie, która metoda nauki (np. fiszki, mapy myśli, `sp
     ```
     *Instalacja może potrwać 2-3 minuty.*
 
-4.  **Uruchom podgląd slajdów:**
+4.  **Uruchom podgląd slajdów (w terminalu, nie w R):**
     ```bash
     quarto preview quarto/learning_lsa_lda.qmd
     ```
@@ -54,8 +54,9 @@ Aby uruchomić projekt, wykonaj poniższe kroki w terminalu, będąc w głównym
     Rscript install.R
     ```
 
-3.  **Wyświetl slajdy:**
+3.  **Wyświetl slajdy (w terminalu, nie w R):**
     *   Ta komenda uruchomi lokalny serwer i otworzy podgląd slajdów w Twojej domyślnej przeglądarce.
+    *   **Ważne:** Uruchom tę komendę w terminalu systemowym (np. PowerShell, CMD, Bash), a **nie** wewnątrz konsoli R.
     ```bash
     quarto preview quarto/learning_lsa_lda.qmd
     ```
@@ -114,7 +115,6 @@ Aby pobrać dane, potrzebujesz konta na [Kaggle](https://kaggle.com).
 *   Kopiuje `kaggle.json` do `~/.kaggle/` i ustawia odpowiednie uprawnienia (`chmod 600`).
 *   Pobiera zbiór danych `adilshamim8/student-performance-and-learning-style` do katalogu `data/`.
 *   Rozpakowuje archiwum, tworząc plik `student_performance_large_dataset.csv`.
-*   Dataset zawiera kolumny `Learning Style` oraz `Performance` oraz opis tekstowy w pierwszej kolumnie. Nazwy kolumn są automatycznie konwertowane do formatu `learning_style` i `performance`.
 
 > **Alternatywa (ręczna):** Ustaw zmienne środowiskowe `KAGGLE_USERNAME` i `KAGGLE_KEY`, a następnie wykonaj komendy `kaggle datasets download ...` i `unzip ...` ręcznie.
 
