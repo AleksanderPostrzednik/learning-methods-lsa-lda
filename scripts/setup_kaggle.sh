@@ -3,7 +3,7 @@ set -e
 
 # Download directory
 mkdir -p data
-FILE="data/student_performance.csv"
+FILE="data/student_performance_large_dataset.csv"
 
 # Skip if file already present
 if [[ -f "$FILE" ]]; then
@@ -18,7 +18,7 @@ if [[ ! -f ~/.kaggle/kaggle.json ]]; then
 fi
 
 echo "[INFO] Downloading dataset from Kaggle..."
-kaggle datasets download -d adilshamim8/student-performance-and-learning-style -f student_performance.csv -p data/
+kaggle datasets download -d adilshamim8/student-performance-and-learning-style -f student_performance_large_dataset.csv -p data/
 
 # Unzip if necessary
 if ls data/*.zip 1>/dev/null 2>&1; then

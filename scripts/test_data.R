@@ -1,2 +1,2 @@
-stopifnot(all(c("learning_style","performance") %in% 
-              colnames(readr::read_csv("data/student_performance.csv"))))
+stopifnot(all(c("gender","math_score") %in% 
+              colnames(readr::read_csv("data/student_performance_large_dataset.csv"))))
