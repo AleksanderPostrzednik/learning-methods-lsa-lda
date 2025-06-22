@@ -28,6 +28,7 @@ freeze: auto
 ```{r setup}
 library(tidyverse)
 library(tidytext)
+stop_words <- tidytext::stop_words
 library(lsa)
 library(topicmodels)
 library(umap)
