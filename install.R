@@ -39,20 +39,17 @@ ensure_pkg <- function(pkg, max_attempts = 3) {
 # 4. Install required packages
 ok_pkgs <- vapply(pkgs, ensure_pkg, logical(1))
 
-# 5. Load textdata and download lexicons
+# 5. Pre-download sentiment lexicons using tidytext
 lex_ok <- function(name) {
   out <- FALSE
   tryCatch({
-    if (!requireNamespace("textdata", quietly = TRUE)) stop("textdata missing")
-    if (exists("download_lexicon", where = asNamespace("textdata"))) {
-      textdata::download_lexicon(name)
-    } else {
-      get(paste0("lexicon_", name), envir = asNamespace("textdata"))(ask = FALSE)
-    }
-    file <- file.path(textdata::lexicon_cache_dir(), paste0(name, ".rds"))
-    out <- file.exists(file)
+    lex <- tidytext::get_sentiments(name)
+    out <- NROW(lex) > 0
   }, error = function(e) {
-    msg <- sprintf("Run `tidytext::get_sentiments('%s')` once in an interactive R session to cache the file.", name)
+    msg <- sprintf(
+      "Run `tidytext::get_sentiments('%s')` once in an interactive R session to cache the file.",
+      name
+    )
     if (!interactive()) message("[WARN] ", e$message, "\n       ", msg)
     else message("[WARN] ", e$message)
   })
