@@ -1,5 +1,7 @@
 # Ignore dataset and caches
 /data/
+!data/.gitkeep
+
 *.Rproj.user/
 *.html
 *.pdf

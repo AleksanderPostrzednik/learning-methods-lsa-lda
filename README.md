@@ -82,7 +82,7 @@ Aby uruchomić projekt, wykonaj poniższe kroki w terminalu, będąc w głównym
 ```
 learning-methods-lsa-lda/
 ├── data/                          # ⇦ Pliki CSV z Kaggle
-│   └── student-math-learning.csv
+│   └── student_performance_large_dataset.csv
 ├── quarto/
 │   └── learning_lsa_lda.qmd       # ⇦ Główny plik ze slajdami (reveal.js)
 ├── renv/                          # ⇦ Biblioteki R (ignorowane przez .gitignore)
@@ -113,7 +113,8 @@ Aby pobrać dane, potrzebujesz konta na [Kaggle](https://kaggle.com).
 **Co robi skrypt `setup_kaggle.sh`?**
 *   Kopiuje `kaggle.json` do `~/.kaggle/` i ustawia odpowiednie uprawnienia (`chmod 600`).
 *   Pobiera zbiór danych `adilshamim8/student-performance-and-learning-style` do katalogu `data/`.
-*   Rozpakowuje archiwum, tworząc plik `student-math-learning.csv`.
+*   Rozpakowuje archiwum, tworząc plik `student_performance_large_dataset.csv`.
+*   Dataset zawiera kolumny `Learning Style` oraz `Performance` oraz opis tekstowy w pierwszej kolumnie. Nazwy kolumn są automatycznie konwertowane do formatu `learning_style` i `performance`.
 
 > **Alternatywa (ręczna):** Ustaw zmienne środowiskowe `KAGGLE_USERNAME` i `KAGGLE_KEY`, a następnie wykonaj komendy `kaggle datasets download ...` i `unzip ...` ręcznie.
 
@@ -140,7 +141,8 @@ pkgs <- c(
   "textmineR",   # Obliczanie koherencji i inne narzędzia
   "umap",        # Redukcja wymiarowości (2D)
   "ggwordcloud", # Chmury słów
-  "readr"        # Szybki import plików CSV
+  "readr",       # Szybki import plików CSV
+  "janitor"      # Czyszczenie nazw kolumn
 )
 
 # 4. Instalacja pakietów
@@ -160,7 +162,7 @@ Plik `quarto/learning_lsa_lda.qmd` zawiera całą logikę analizy danych, podzie
 | Chunk / Sekcja  | Cel i zawartość                                               |
 | :-------------- | :------------------------------------------------------------ |
 | `setup`         | Ładowanie bibliotek R, ustawienia globalne `knitr::opts_chunk$set()`. |
-| `data-load`     | Wczytanie danych z `../data/student-math-learning.csv` do ramki danych `df`. |
+| `data-load`     | Wczytanie danych z `../data/student_performance_large_dataset.csv` do ramki danych `df`. |
 | `clean`         | Czyszczenie tekstu: łączenie kolumn, zmiana na małe litery, tokenizacja, usunięcie stop-words. |
 | `lsa`           | Obliczenie TF-IDF, dopasowanie modelu LSA (`k=20`), wizualizacja 2D (UMAP/PCA). |
 | `lda`           | Modelowanie LDA (`k=8`), ekstrakcja top 10 słów dla każdego tematu. |
