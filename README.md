@@ -162,8 +162,8 @@ Plik `quarto/learning_lsa_lda.qmd` zawiera całą logikę analizy danych, podzie
 | Chunk / Sekcja  | Cel i zawartość                                               |
 | :-------------- | :------------------------------------------------------------ |
 | `setup`         | Ładowanie bibliotek R, ustawienia globalne `knitr::opts_chunk$set()`. |
-| `data-load`     | Wczytanie danych z `data/student_performance_large_dataset.csv` do ramki danych `df`. |
-| `clean`         | Czyszczenie tekstu: łączenie kolumn, zmiana na małe litery, tokenizacja, usunięcie stop-words. |
+| `data-load`     | Wczytanie danych z `../data/student_performance_large_dataset.csv` i przygotowanie danych. |
+| `clean`         | Tworzenie kolumny tekstowej do analizy (z braku danych opisowych), czyszczenie tekstu: zmiana na małe litery, tokenizacja, usunięcie stop-words. |
 | `lsa`           | Obliczenie TF-IDF, dopasowanie modelu LSA (`k=20`), wizualizacja 2D (UMAP/PCA). |
 | `lda`           | Modelowanie LDA (`k=8`), ekstrakcja top 10 słów dla każdego tematu. |
 | `sentiment`     | Analiza sentymentu z użyciem słownika NRC, wizualizacja emocji (barplot, chmura słów). |

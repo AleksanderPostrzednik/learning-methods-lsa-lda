@@ -1,30 +1,40 @@
-#!/usr/bin/env bash
-set -e
+#!/bin/bash
 
-# Download directory
-mkdir -p data
-FILE="data/student_performance_large_dataset.csv"
+# Function to print messages
+print_msg() {
+    echo "[INFO] $1"
+}
 
-# Skip if file already present
-if [[ -f "$FILE" ]]; then
-    echo "[INFO] $FILE already exists – skip download."
+DATA_FILE="data/student_performance_large_dataset.csv"
+
+# Check if data file already exists
+if [ -f "$DATA_FILE" ]; then
+    print_msg "Dataset '$DATA_FILE' already exists. Skipping download."
     exit 0
 fi
 
-# Verify Kaggle credentials
-if [[ ! -f ~/.kaggle/kaggle.json ]]; then
-    echo "[ERROR] ~/.kaggle/kaggle.json not found. Please configure Kaggle API token." >&2
+# Check for kaggle.json
+if [ ! -f "kaggle.json" ]; then
+    echo "[ERROR] kaggle.json not found in the root directory."
+    echo "Please download it from your Kaggle account (Account -> Create New API Token) and place it here."
     exit 1
 fi
 
-echo "[INFO] Downloading dataset from Kaggle..."
-kaggle datasets download -d adilshamim8/student-performance-and-learning-style -f student_performance_large_dataset.csv -p data/
+# Setup Kaggle API token
+print_msg "Setting up Kaggle API token..."
+mkdir -p ~/.kaggle/
+cp kaggle.json ~/.kaggle/
+chmod 600 ~/.kaggle/kaggle.json
 
-# Unzip if necessary
-if ls data/*.zip 1>/dev/null 2>&1; then
-    unzip -o data/*.zip -d data/
-    rm data/*.zip
+# Download the dataset
+print_msg "Downloading dataset from Kaggle..."
+# Dataset: https://www.kaggle.com/datasets/adilshamim8/student-performance-and-learning-style
+kaggle datasets download -d adilshamim8/student-performance-and-learning-style -p data/ --unzip
+
+# Clean up the downloaded zip file if it exists
+if [ -f "data/student-performance-and-learning-style.zip" ]; then
+    print_msg "Cleaning up..."
+    rm data/student-performance-and-learning-style.zip
 fi
 
-mv -f data/*student*performance*.csv "$FILE"
-echo "[INFO] Saved to $FILE"
+print_msg "Setup complete. The dataset is in the 'data/' directory."

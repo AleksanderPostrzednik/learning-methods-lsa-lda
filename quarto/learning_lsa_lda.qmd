@@ -11,12 +11,12 @@ format: revealjs
 
 # Agenda
 
-1. Data load
-2. Cleaning
-3. LSA
-4. LDA
-5. Sentiment
-6. Conclusions
+1.  Data load
+2.  Cleaning
+3.  LSA
+4.  LDA
+5.  Sentiment
+6.  Conclusions
 
 ---
 
@@ -30,6 +30,8 @@ library(ggwordcloud)
 library(textmineR)
 library(plotly)
 library(janitor)
+library(tm) # for weightTfIdf
+library(textdata)
 
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
@@ -37,10 +39,16 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ---
 
 ```{r data-load}
-df_raw <- read_csv("data/student_performance_large_dataset.csv") %>%
+# Corrected file path to be relative to the qmd file location
+df_raw <- read_csv("../data/student_performance_large_dataset.csv") %>%
   janitor::clean_names()
 
-required_cols <- c("gender", "math_score")
+# Create a text column for analysis by combining categorical columns.
+df_raw <- df_raw %>%
+  mutate(text_for_analysis = paste(preferred_learning_style, self_reported_stress_level, final_grade))
+
+# Check for required columns after cleaning names
+required_cols <- c("gender", "exam_score_percent", "preferred_learning_style", "text_for_analysis")
 missing <- setdiff(required_cols, names(df_raw))
 if (length(missing) > 0) {
   stop(paste("Missing columns:", paste(missing, collapse = ", ")))
@@ -50,9 +58,10 @@ if (length(missing) > 0) {
 ---
 
 ```{r clean}
+# Use the newly created text column and correct column names
 text_df <- df_raw %>%
   mutate(document = row_number()) %>%
-  select(document, text_column = study_notes, gender, math_score) %>%
+  select(document, text_column = text_for_analysis, learning_style = preferred_learning_style, performance = exam_score_percent) %>%
   unnest_tokens(word, text_column) %>%
   anti_join(stop_words, by = "word")
 ```
@@ -64,14 +73,19 @@ term_mat <- text_df %>%
   count(document, word) %>%
   cast_dtm(document, word, n)
 
+# Check if term_mat is empty
+if (nrow(term_mat) == 0 || ncol(term_mat) == 0) {
+  stop("Document-term matrix is empty. Check cleaning steps.")
+}
+
 term_tfidf <- weightTfIdf(term_mat)
-lsa_res <- lsa(term_tfidf, dims = 20)
+lsa_res <- lsa(term_tfidf, dims = 2) 
 
 coords <- as.data.frame(lsa_res$dk)
 coords$doc <- rownames(coords)
 
 coords %>%
-  ggplot(aes(Dim1, Dim2)) +
+  ggplot(aes(V1, V2)) +
   geom_point() +
   theme_minimal()
 ```
@@ -79,13 +93,14 @@ coords %>%
 ---
 
 ```{r lda}
-lda_model <- LDA(term_mat, k = 8, control = list(seed = 123))
+lda_model <- LDA(term_mat, k = 4, control = list(seed = 123))
 terms(lda_model, 10) %>%
   knitr::kable()
 ```
 
 ```{r lda-prepare}
-doc_topics <- posterior(lda_model)$topics
+# Explicitly use the posterior function from the topicmodels package
+doc_topics <- topicmodels::posterior(lda_model)$topics
 topic_df <- as.data.frame(doc_topics)
 topic_df$document <- as.integer(rownames(topic_df))
 topic_df$dominant_topic <- apply(doc_topics, 1, which.max)
@@ -97,7 +112,7 @@ sentiment_doc <- text_df %>%
 
 meta_df <- df_raw %>%
   mutate(document = row_number()) %>%
-  select(document, gender, math_score)
+  select(document, learning_style = preferred_learning_style, performance = exam_score_percent)
 
 topic_meta <- topic_df %>%
   left_join(meta_df, by = "document") %>%
@@ -122,11 +137,12 @@ text_df %>%
 
 ```{r style-comparison}
 style_summary <- topic_meta %>%
-  group_by(gender) %>%
+  filter(!is.na(learning_style)) %>%
+  group_by(learning_style) %>%
   summarise(avg_sentiment = mean(sentiment, na.rm = TRUE))
 
 p_style <- ggplot(style_summary,
-                  aes(gender, avg_sentiment, fill = gender)) +
+                  aes(learning_style, avg_sentiment, fill = learning_style)) +
   geom_col(show.legend = FALSE) +
   theme_minimal()
 
@@ -138,14 +154,14 @@ ggplotly(p_style)
 ## Topic Clusters (UMAP)
 
 ```{r umap}
-umap_res <- umap(coords[,1:20])
+umap_res <- umap(lsa_res$dk)
 umap_df <- as.data.frame(umap_res$layout)
 colnames(umap_df) <- c("Dim1", "Dim2")
 umap_df$document <- as.integer(coords$doc)
 umap_df <- left_join(umap_df, topic_meta, by = "document")
 
 p_umap <- ggplot(umap_df,
-                 aes(Dim1, Dim2, color = gender,
+                 aes(Dim1, Dim2, color = learning_style,
                      text = paste0("Doc ", document,
                                     "<br>Topic ", dominant_topic))) +
   geom_point() +
@@ -160,11 +176,12 @@ ggplotly(p_umap)
 
 ```{r topic-insights}
 topic_stats <- topic_meta %>%
+  filter(!is.na(dominant_topic)) %>%
   group_by(dominant_topic) %>%
   summarise(
     responses = n(),
     avg_sentiment = mean(sentiment, na.rm = TRUE),
-    avg_perf = mean(math_score, na.rm = TRUE)
+    avg_perf = mean(performance, na.rm = TRUE)
   )
 
 knitr::kable(topic_stats)
