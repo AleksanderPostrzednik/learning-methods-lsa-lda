@@ -52,6 +52,25 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 df_raw <- read_csv("../data/student_performance_large_dataset.csv") %>%
   janitor::clean_names()
 
+# Convert categorical columns to factors
+cat_cols <- c(
+  "gender",
+  "preferred_learning_style",
+  "participation_in_discussions",
+  "use_of_educational_tech",
+  "self_reported_stress_level",
+  "final_grade"
+)
+df_raw <- df_raw %>% mutate(across(all_of(cat_cols), as.factor))
+
+# Final grade as ordered factor
+df_raw$final_grade <- factor(df_raw$final_grade,
+                             levels = c("A", "B", "C", "D"),
+                             ordered = TRUE)
+
+# Basic validation
+stopifnot(nrow(df_raw) == 10000, sum(is.na(df_raw)) == 0)
+
 # Create a text column for analysis by combining categorical columns.
 df_raw <- df_raw %>%
   mutate(text_for_analysis = paste(preferred_learning_style, self_reported_stress_level, final_grade))
