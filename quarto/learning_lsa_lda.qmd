@@ -1,5 +1,5 @@
 ---
-title: "Learning Methods Analysis"
+title: "Analiza metod nauki"
 format:
   revealjs:
     code-fold: true
@@ -8,20 +8,20 @@ format:
 freeze: auto
 ---
 
-# Title
+# Tytuł
 
-## Which study method works best?
+## Która metoda nauki działa najlepiej?
 
 ---
 
-# Agenda
+# Plan prezentacji
 
-1.  Data load
-2.  Cleaning
+1.  Wczytanie danych
+2.  Czyszczenie
 3.  LSA
 4.  LDA
-5.  Sentiment
-6.  Conclusions
+5.  Analiza sentymentu
+6.  Wnioski
 
 ---
 
@@ -162,7 +162,7 @@ text_df %>%
 
 ---
 
-## Learning Style Comparison
+## Porównanie stylów nauki
 
 ```{r style-comparison}
 style_summary <- topic_meta %>%
@@ -180,7 +180,7 @@ ggplotly(p_style)
 
 ---
 
-## Topic Clusters (UMAP)
+## Klastry tematów (UMAP)
 
 ```{r umap}
 n_items <- nrow(lsa_res$dk)
@@ -206,7 +206,7 @@ ggplotly(p_umap)
 
 ---
 
-## Topic-wise Insights
+## Wnioski dla poszczególnych tematów
 
 ```{r topic-insights}
 topic_stats <- topic_meta %>%
@@ -223,9 +223,16 @@ knitr::kable(topic_stats)
 
 ---
 
-# Conclusions
+# Wnioski
 
-- LSA and LDA highlight topic structure
-- Sentiment shows overall tone
-- Further tuning and validation required
-- **TODO**: integrate additional metadata
+- LSA i LDA pokazują strukturę tematów
+- Analiza sentymentu ujawnia ogólny ton
+- Konieczne jest dalsze strojenie i walidacja
+- **TODO**: zintegrować dodatkowe metadane
+
+---
+
+## Źródła
+
+- Dane: [Student Performance and Learning Style](https://www.kaggle.com/datasets/adilshamim8/student-performance-and-learning-style)
+- Pakiety R: tidyverse, topicmodels, textmineR
