@@ -183,7 +183,12 @@ ggplotly(p_style)
 ## Topic Clusters (UMAP)
 
 ```{r umap}
-umap_res <- umap(lsa_res$dk)
+n_items <- nrow(lsa_res$dk)
+if (n_items < 3) {
+  stop("Need at least 3 documents for UMAP")
+}
+n_neighbors <- min(15, n_items - 1)
+umap_res <- umap(lsa_res$dk, n_neighbors = n_neighbors)
 umap_df <- as.data.frame(umap_res$layout)
 colnames(umap_df) <- c("Dim1", "Dim2")
 umap_df$document <- as.integer(coords$doc)
