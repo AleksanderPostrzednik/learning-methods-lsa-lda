@@ -132,7 +132,8 @@ topic_meta <- topic_df %>%
 
 ```{r sentiment}
 text_df %>%
-  inner_join(get_sentiments("nrc"), by = "word") %>%
+  inner_join(get_sentiments("afinn"), by = "word") %>%
+  mutate(sentiment = ifelse(value > 0, "positive", "negative")) %>%
   count(sentiment) %>%
   ggplot(aes(sentiment, n, fill = sentiment)) +
   geom_col(show.legend = FALSE) +
