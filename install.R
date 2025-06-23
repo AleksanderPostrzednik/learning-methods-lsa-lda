@@ -50,33 +50,13 @@ lex_ok <- function(name) {
       "Run `tidytext::get_sentiments('%s')` once in an interactive R session to cache the file.",
       name
     )
-    if (name == "nrc" && !interactive()) {
-      dir <- textdata::lexicon_nrc(return_path = TRUE)
-      zip <- file.path(dir, "nrc.zip")
-      url <- "https://saifmohammad.com/WebDocs/NRC-Emotion-Lexicon.zip"
-      dir.create(dir, showWarnings = FALSE, recursive = TRUE)
-      try(download.file(url, zip, quiet = TRUE), silent = TRUE)
-      try(unzip(zip, exdir = dir), silent = TRUE)
-      src <- file.path(dir, "NRC-Emotion-Lexicon", "NRC-Emotion-Lexicon-v0.92",
-                       "NRC-Emotion-Lexicon-Wordlevel-v0.92.txt")
-      dst <- file.path(dir, "NRC-Emotion-Lexicon",
-                       "NRC-Emotion-Lexicon-Wordlevel-v0.92.txt")
-      if (file.exists(src)) file.copy(src, dst, overwrite = TRUE)
-      try({
-        lex <- tidytext::get_sentiments(name)
-        out <<- NROW(lex) > 0
-      }, silent = TRUE)
-    }
-    if (!out) {
-      if (!interactive()) message("[WARN] ", e$message, "\n       ", msg)
-      else message("[WARN] ", e$message)
-    }
+    if (!interactive()) message("[WARN] ", e$message, "\n       ", msg)
+    else message("[WARN] ", e$message)
   })
   out
 }
 
 afinn_ok <- lex_ok("afinn")
-nrc_ok   <- lex_ok("nrc")
 
 # 6. Check all packages load
 load_ok <- vapply(pkgs, function(p) {
@@ -86,7 +66,7 @@ load_ok <- vapply(pkgs, function(p) {
   }, error = function(e) FALSE)
 }, logical(1))
 
-success <- all(ok_pkgs) && all(load_ok) && afinn_ok && nrc_ok
+success <- all(ok_pkgs) && all(load_ok) && afinn_ok
 
 if (success) {
   cat("\033[32m[SUCCESS]\033[39m Packages and lexicons ready.\n")

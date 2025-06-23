@@ -1,0 +1,6 @@
+gender,exam_score_percent,math_score,preferred_learning_style,self_reported_stress_level,final_grade
+female,88,90,flashcards,low,A
+male,75,70,mindmaps,high,B
+female,92,95,spaced repetition,medium,A
+male,60,65,flashcards,medium,C
+female,82,80,mindmaps,low,B

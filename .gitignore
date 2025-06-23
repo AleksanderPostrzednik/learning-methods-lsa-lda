@@ -1,6 +1,7 @@
 # Ignore dataset and caches
 /data/
 !data/.gitkeep
+!data/student_performance_large_dataset.csv
 
 *.Rproj.user/
 *.html

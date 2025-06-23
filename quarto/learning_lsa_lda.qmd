@@ -132,7 +132,7 @@ topic_meta <- topic_df %>%
 
 ```{r sentiment}
 text_df %>%
-  inner_join(get_sentiments("nrc"), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
   count(sentiment) %>%
   ggplot(aes(sentiment, n, fill = sentiment)) +
   geom_col(show.legend = FALSE) +
