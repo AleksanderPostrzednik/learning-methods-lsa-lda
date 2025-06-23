@@ -141,7 +141,6 @@ invisible(lapply(pkgs, install_if_missing))
 
 library(textdata)
 textdata::download_lexicon("afinn")
-textdata::download_lexicon("nrc")
 ```
 
 ---
@@ -157,7 +156,7 @@ Plik `quarto/learning_lsa_lda.qmd` zawiera całą logikę analizy danych, podzie
 | `clean`         | Tworzenie kolumny tekstowej do analizy (z braku danych opisowych), czyszczenie tekstu: zmiana na małe litery, tokenizacja, usunięcie stop-words. |
 | `lsa`           | Obliczenie TF-IDF, dopasowanie modelu LSA (`k=20`), wizualizacja 2D (UMAP/PCA). |
 | `lda`           | Modelowanie LDA (`k=8`), ekstrakcja top 10 słów dla każdego tematu. |
-| `sentiment`     | Analiza sentymentu z użyciem słownika NRC, wizualizacja emocji (barplot, chmura słów). |
+| `sentiment`     | Analiza sentymentu z użyciem słownika Bing, wizualizacja emocji (barplot, chmura słów). |
 | `gpa-boxplot`   | Wizualizacja zależności GPA od stylu nauki (boxplot).         |
 | `conclusions`   | Podsumowanie (3-5 głównych wniosków) i omówienie ograniczeń modelu. |
 
@@ -175,7 +174,7 @@ quarto render quarto/learning_lsa_lda.qmd --to revealjs
 | **TF-IDF**  | Miara ważności słowa: rośnie, gdy słowo jest rzadkie w całym zbiorze tekstów. | Służy jako macierz wejściowa dla modelu LSA.                  |
 | **LSA**     | Metoda matematyczna redukująca tysiące słów do kilkunastu "ukrytych wymiarów znaczeń". | Umożliwia wizualizację studentów w 2D i pokolorowanie ich według metody nauki. |
 | **LDA**     | Algorytm, który "odgaduje" tematy, na jakie można podzielić zbiór tekstów. | Zidentyfikowano 8 głównych tematów wraz z listą najważniejszych słów. |
-| **NRC Lexicon** | Gotowy słownik mapujący słowa na 8 podstawowych emocji i polaryzację (pozytywna/negatywna). | Obliczono, które emocje dominują w opisach stylów nauki.     |
+| **Bing Lexicon** | Prosty słownik przypisujący słowom etykietę pozytywną lub negatywną. | Obliczono, jaki jest ogólny wydźwięk opisów stylów nauki. |
 | **UMAP**    | Algorytm redukcji wymiaru, który dobrze zachowuje lokalne sąsiedztwa punktów. | Użyty jako alternatywa dla PCA do tworzenia czytelniejszych wykresów 2D. |
 
 ---
