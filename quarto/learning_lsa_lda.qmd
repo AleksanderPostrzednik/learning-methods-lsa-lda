@@ -50,39 +50,62 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ---
 
 ```{r data-load}
-# Corrected file path to be relative to the qmd file location
-df_raw <- read_csv("../data/student_performance_large_dataset.csv") %>%
-  janitor::clean_names()
+english_path <- "../data/sentiment140.csv"
+feedback_path <- "../data/student_feedback_dataset.csv"
+kaggle_path   <- "../data/student_performance_large_dataset.csv"
 
-# Convert categorical columns to factors
-cat_cols <- c(
-  "gender",
-  "preferred_learning_style",
-  "participation_in_discussions",
-  "use_of_educational_tech",
-  "self_reported_stress_level",
-  "final_grade"
-)
-df_raw <- df_raw %>% mutate(across(all_of(cat_cols), as.factor))
+if (file.exists(english_path)) {
+  df_raw <- read_csv(english_path, col_names = FALSE) %>%
+    select(text_for_analysis = X6,
+           sentiment_label = X1) %>%
+    mutate(
+      preferred_learning_style = NA,
+      exam_score_percent = NA_real_
+    )
+} else if (file.exists(feedback_path)) {
+  df_raw <- read_csv(feedback_path, locale = locale(encoding = "Latin-1")) %>%
+    rename(
+      text_for_analysis = comentario,
+      sentiment_label   = Valor,
+      topic_label       = nombreAspecto
+    ) %>%
+    mutate(
+      preferred_learning_style = NA,
+      exam_score_percent = NA_real_
+    )
+} else {
+  df_raw <- read_csv(kaggle_path) %>%
+    janitor::clean_names()
 
-# Final grade as ordered factor
-df_raw$final_grade <- factor(df_raw$final_grade,
-                             levels = c("A", "B", "C", "D"),
-                             ordered = TRUE)
+  cat_cols <- c(
+    "gender",
+    "preferred_learning_style",
+    "participation_in_discussions",
+    "use_of_educational_tech",
+    "self_reported_stress_level",
+    "final_grade"
+  )
+  df_raw <- df_raw %>% mutate(across(all_of(cat_cols), as.factor))
 
-# Basic validation
-stopifnot(nrow(df_raw) == 10000, sum(is.na(df_raw)) == 0)
+  df_raw$final_grade <- factor(df_raw$final_grade,
+                               levels = c("A", "B", "C", "D"),
+                               ordered = TRUE)
 
-# Create a text column for analysis by combining categorical columns.
-df_raw <- df_raw %>%
-  mutate(text_for_analysis = paste(preferred_learning_style, self_reported_stress_level, final_grade))
+  stopifnot(nrow(df_raw) == 10000, sum(is.na(df_raw)) == 0)
 
-# Check for required columns after cleaning names
-required_cols <- c("gender", "exam_score_percent", "preferred_learning_style", "text_for_analysis")
-missing <- setdiff(required_cols, names(df_raw))
-if (length(missing) > 0) {
-  stop(paste("Missing columns:", paste(missing, collapse = ", ")))
+  df_raw <- df_raw %>%
+    mutate(text_for_analysis = paste(preferred_learning_style, self_reported_stress_level, final_grade))
 }
+
+if (!"preferred_learning_style" %in% names(df_raw)) {
+  df_raw$preferred_learning_style <- NA
+}
+if (!"exam_score_percent" %in% names(df_raw)) {
+  df_raw$exam_score_percent <- NA_real_
+}
+
+# Ensure text_for_analysis exists
+stopifnot("text_for_analysis" %in% names(df_raw))
 ```
 
 ---

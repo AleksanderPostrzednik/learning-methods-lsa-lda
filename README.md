@@ -18,20 +18,26 @@ Głównym celem jest zbadanie, która metoda nauki (np. fiszki, mapy myśli, `sp
     cd learning-methods-lsa-lda
     ```
 
-2.  **Pobierz dane z Kaggle:**
+2.  **Pobierz dane z Kaggle (dane liczbowe):**
     > **Wymagane:** Konto na [Kaggle](https://kaggle.com) i plik `kaggle.json`.
     ```bash
     bash scripts/setup_kaggle.sh
     ```
     *Skrypt pobierze dane do katalogu `data/`.*
 
-3.  **Zainstaluj pakiety R:**
+3.  **Pobierz angielski zbiór tweetów (1.6 mln wpisów):**
+    ```bash
+    bash scripts/setup_feedback.sh
+    ```
+    *Zostanie utworzony plik `data/sentiment140.csv`.*
+
+4.  **Zainstaluj pakiety R:**
     ```bash
     Rscript install.R
     ```
     *Instalacja może potrwać 2-3 minuty.*
 
-4.  **Uruchom podgląd slajdów (w terminalu, nie w R):**
+5.  **Uruchom podgląd slajdów (w terminalu, nie w R):**
     ```bash
     quarto preview quarto/learning_lsa_lda.qmd
     ```
@@ -47,14 +53,18 @@ Aby uruchomić projekt, wykonaj poniższe kroki w terminalu, będąc w głównym
     ```bash
     bash scripts/setup_kaggle.sh
     ```
+2.  **Pobierz angielski zbiór tweetów:**
+    ```bash
+    bash scripts/setup_feedback.sh
+    ```
 
-2.  **Zainstaluj pakiety R:**
+3.  **Zainstaluj pakiety R:**
     *   Skrypt zainstaluje brakujące pakiety R i pobierze słowniki sentymentu.
     ```bash
     Rscript install.R
     ```
 
-3.  **Wyświetl slajdy (w terminalu, nie w R):**
+4.  **Wyświetl slajdy (w terminalu, nie w R):**
     *   Ta komenda uruchomi lokalny serwer i otworzy podgląd slajdów w Twojej domyślnej przeglądarce.
     *   **Ważne:** Uruchom tę komendę w terminalu systemowym (np. PowerShell, CMD, Bash), a **nie** wewnątrz konsoli R.
     ```bash
@@ -82,12 +92,14 @@ Aby uruchomić projekt, wykonaj poniższe kroki w terminalu, będąc w głównym
 
 ```
 learning-methods-lsa-lda/
-├── data/                          # ⇦ Pliki CSV z Kaggle
-│   └── student_performance_large_dataset.csv
+├── data/
+│   ├── student_performance_large_dataset.csv  # ⇦ Dane z Kaggle
+│   └── sentiment140.csv                      # ⇦ 1.6 mln angielskich tweetów
 ├── quarto/
 │   └── learning_lsa_lda.qmd       # ⇦ Główny plik ze slajdami (reveal.js)
 ├── scripts/
 │   ├── setup_kaggle.sh            # ⇦ Pobiera dane i konfiguruje API token
+│   ├── setup_feedback.sh          # ⇦ Pobiera angielski zbiór tweetów
 │   └── bake_wordclouds.R          # ⇦ (Opcjonalnie) Generuje chmury słów jako PNG
 ├── .gitignore
 ├── install.R                      # ⇦ Skrypt do instalacji pakietów R
@@ -116,7 +128,17 @@ Aby pobrać dane, potrzebujesz konta na [Kaggle](https://kaggle.com).
 
 > **Alternatywa (ręczna):** Ustaw zmienne środowiskowe `KAGGLE_USERNAME` i `KAGGLE_KEY`, a następnie wykonaj komendy `kaggle datasets download ...` i `unzip ...` ręcznie.
 
-### 2. Instalacja pakietów R
+### 2. Pobieranie tweetów do analizy
+
+Skrypt pobiera korpus **Sentiment140** zawierający 1.6&nbsp;miliona angielskich tweetów z etykietami sentymentu.
+
+```bash
+bash scripts/setup_feedback.sh
+```
+
+Powstanie plik `sentiment140.csv` w katalogu `data/`.
+
+### 3. Instalacja pakietów R
 
 Skrypt `install.R` instaluje potrzebne pakiety z CRAN i wstępnie pobiera słowniki sentymentu.
 
@@ -152,7 +174,7 @@ Plik `quarto/learning_lsa_lda.qmd` zawiera całą logikę analizy danych, podzie
 | Chunk / Sekcja  | Cel i zawartość                                               |
 | :-------------- | :------------------------------------------------------------ |
 | `setup`         | Ładowanie bibliotek R, ustawienia globalne `knitr::opts_chunk$set()`. |
-| `data-load`     | Wczytanie danych z `../data/student_performance_large_dataset.csv` i przygotowanie danych. |
+| `data-load`     | Wczytanie danych z `../data/student_performance_large_dataset.csv` lub `sentiment140.csv` i przygotowanie danych. |
 | `clean`         | Tworzenie kolumny tekstowej do analizy (z braku danych opisowych), czyszczenie tekstu: zmiana na małe litery, tokenizacja, usunięcie stop-words. |
 | `lsa`           | Obliczenie TF-IDF, dopasowanie modelu LSA (`k=20`), wizualizacja 2D (UMAP/PCA). |
 | `lda`           | Modelowanie LDA (`k=8`), ekstrakcja top 10 słów dla każdego tematu. |
