@@ -9,7 +9,7 @@ pkgs <- c(
   "tidyverse", "janitor", "tidytext",
   "topicmodels", "textmineR", "tm", "SnowballC",
   "wordcloud", "knitr", "quarto",
-  "lsa", "umap", "plotly", "ggwordcloud"
+  "lsa", "umap", "plotly", "ggwordcloud", "dbscan"
 )
 
 # 3. Helper to install packages with retries
