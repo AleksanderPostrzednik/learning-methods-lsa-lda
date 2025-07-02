@@ -246,7 +246,9 @@ df_raw |>
 ## Klastrowanie HDBSCAN w przestrzeni LSA-UMAP
 
 ```{r}
-hdb <- hdbscan(lsa_res$dk, minPts = 15)
+# Adjust `minPts` if the data set is small
+min_pts <- min(15, n_items)
+hdb <- hdbscan(lsa_res$dk, minPts = min_pts)
 umap_df$cluster <- factor(hdb$cluster)
 
 ggplot(umap_df, aes(Dim1, Dim2, colour = cluster)) +
