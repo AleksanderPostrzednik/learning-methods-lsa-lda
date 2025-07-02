@@ -143,32 +143,6 @@ coords %>%
   theme_minimal()
 ```
 
----
-
-## Klastry tematów (UMAP)
-
-```{r umap}
-n_items <- nrow(lsa_res$dk)
-if (n_items < 3) {
-  stop("Need at least 3 documents for UMAP")
-}
-n_neighbors <- min(15, n_items - 1)
-umap_res <- umap(lsa_res$dk, n_neighbors = n_neighbors)
-umap_df <- as.data.frame(umap_res$layout)
-colnames(umap_df) <- c("Dim1", "Dim2")
-umap_df$document <- as.integer(coords$doc)
-umap_df <- left_join(umap_df, topic_meta, by = "document")
-
-p_umap <- ggplot(umap_df,
-                 aes(Dim1, Dim2, color = learning_style,
-                     text = paste0("Doc ", document,
-                                    "<br>Topic ", dominant_topic))) +
-  geom_point() +
-  theme_minimal()
-
-ggplotly(p_umap)
-```
----
 
 ```{r lda}
 lda_model <- LDA(term_mat, k = 4, control = list(seed = 123))
@@ -195,6 +169,32 @@ meta_df <- df_raw %>%
 topic_meta <- topic_df %>%
   left_join(meta_df, by = "document") %>%
   left_join(sentiment_doc, by = "document")
+```
+
+---
+
+## Klastry tematów (UMAP)
+
+```{r umap}
+n_items <- nrow(lsa_res$dk)
+if (n_items < 3) {
+  stop("Need at least 3 documents for UMAP")
+}
+n_neighbors <- min(15, n_items - 1)
+umap_res <- umap(lsa_res$dk, n_neighbors = n_neighbors)
+umap_df <- as.data.frame(umap_res$layout)
+colnames(umap_df) <- c("Dim1", "Dim2")
+umap_df$document <- as.integer(coords$doc)
+umap_df <- left_join(umap_df, topic_meta, by = "document")
+
+p_umap <- ggplot(umap_df,
+                 aes(Dim1, Dim2, color = learning_style,
+                     text = paste0("Doc ", document,
+                                    "<br>Topic ", dominant_topic))) +
+  geom_point() +
+  theme_minimal()
+
+ggplotly(p_umap)
 ```
 
 ---
