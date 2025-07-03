@@ -42,6 +42,11 @@ Głównym celem jest zbadanie, która metoda nauki (np. fiszki, mapy myśli, `sp
     quarto preview quarto/learning_lsa_lda.qmd
     ```
 
+6.  **Wygeneruj finalny plik HTML:**
+    ```bash
+    bash scripts/render_slides.sh
+    ```
+
 ---
 
 ## ✅ Uruchomienie projektu
@@ -184,7 +189,7 @@ Plik `quarto/learning_lsa_lda.qmd` zawiera całą logikę analizy danych, podzie
 
 **Renderowanie pliku do HTML:**
 ```bash
-quarto render quarto/learning_lsa_lda.qmd --to revealjs
+bash scripts/render_slides.sh
 ```
 
 ---
