@@ -7,8 +7,6 @@ params:
 format:
   revealjs:
     code-fold: true
-  html:
-    code-fold: true
 freeze: auto
 ---
 
