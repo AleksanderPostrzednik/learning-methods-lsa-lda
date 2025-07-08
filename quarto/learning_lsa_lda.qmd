@@ -1,9 +1,11 @@
 ---
 title: "Analiza metod nauki"
+params:
+  english_path: !expr Sys.getenv("ENGLISH_PATH", "../data/sentiment140.csv")
+  feedback_path: !expr Sys.getenv("FEEDBACK_PATH", "../data/student_feedback_dataset.csv")
+  kaggle_path: !expr Sys.getenv("KAGGLE_PATH", "../data/student_performance_large_dataset.csv")
 format:
   revealjs:
-    code-fold: true
-  html:
     code-fold: true
 freeze: auto
 ---
@@ -50,9 +52,9 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ---
 
 ```{r data-load}
-english_path <- "../data/sentiment140.csv"
-feedback_path <- "../data/student_feedback_dataset.csv"
-kaggle_path   <- "../data/student_performance_large_dataset.csv"
+english_path <- params$english_path
+feedback_path <- params$feedback_path
+kaggle_path   <- params$kaggle_path
 
 if (file.exists(english_path)) {
   df_raw <- read_csv(english_path, col_names = FALSE) %>%

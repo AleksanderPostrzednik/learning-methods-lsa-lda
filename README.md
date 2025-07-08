@@ -41,6 +41,19 @@ Głównym celem jest zbadanie, która metoda nauki (np. fiszki, mapy myśli, `sp
     ```bash
     quarto preview quarto/learning_lsa_lda.qmd
     ```
+    Jeśli pliki danych znajdują się w innych lokalizacjach, wskaż je
+    zmiennymi środowiskowymi lub parametrami `-P`:
+    ```bash
+    ENGLISH_PATH=/sciezka/tweets.csv \
+    FEEDBACK_PATH=/sciezka/feedback.csv \
+    KAGGLE_PATH=/sciezka/student_data.csv \
+    quarto preview quarto/learning_lsa_lda.qmd
+    # lub
+    quarto preview quarto/learning_lsa_lda.qmd \
+      -P english_path=/sciezka/tweets.csv \
+      -P feedback_path=/sciezka/feedback.csv \
+      -P kaggle_path=/sciezka/student_data.csv
+    ```
 
 6.  **Wygeneruj finalny plik HTML:**
     ```bash
@@ -74,6 +87,19 @@ Aby uruchomić projekt, wykonaj poniższe kroki w terminalu, będąc w głównym
     *   **Ważne:** Uruchom tę komendę w terminalu systemowym (np. PowerShell, CMD, Bash), a **nie** wewnątrz konsoli R.
     ```bash
     quarto preview quarto/learning_lsa_lda.qmd
+    ```
+    Aby wskazać własne lokalizacje danych, ustaw zmienne
+    `ENGLISH_PATH`, `FEEDBACK_PATH` i `KAGGLE_PATH` lub użyj flag `-P`:
+    ```bash
+    ENGLISH_PATH=/sciezka/tweets.csv \
+    FEEDBACK_PATH=/sciezka/feedback.csv \
+    KAGGLE_PATH=/sciezka/student_data.csv \
+    quarto preview quarto/learning_lsa_lda.qmd
+    # lub parametry
+    quarto preview quarto/learning_lsa_lda.qmd \
+      -P english_path=/sciezka/tweets.csv \
+      -P feedback_path=/sciezka/feedback.csv \
+      -P kaggle_path=/sciezka/student_data.csv
     ```
 
 ---
